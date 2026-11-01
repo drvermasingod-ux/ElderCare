@@ -1,0 +1,33 @@
+# ElderCare backend contract
+
+This mobile slice intentionally uses sample data. The following contract is the implementation boundary for the production Firebase build; the UI must not claim these services are live until configured and tested.
+
+## Architecture and ownership
+
+Use Firebase Authentication with phone OTP, Firestore for structured records, Storage for private documents/photos, and Cloud Functions or another trusted server runtime for privileged mutations and scheduled work. The mobile client may read only records authorized by the server/rules and may submit intent; it must never choose its own role, assignment, payment state, or trusted location.
+
+Suggested collections are `users/{uid}` (`role`, `status`, `linkedElderlyIds`, `phone`, timestamps), `elderlyProfiles/{elderlyId}` (`linkedClientIds`, consent flags, health summaries), `bookings/{bookingId}` (`clientId`, `elderlyId`, `serviceType`, address, requested slot, status), `staffAssignments/{assignmentId}` (`bookingId`, `staffId`, status, checkIn metadata), `visitRecords/{visitId}` (`assignmentId`, measurements, notes, consent, submittedAt`), `locationUpdates/{updateId}` (`assignmentId`, point, accuracy, capturedAt`), `medicalDocuments/{documentId}` (`elderlyId`, storagePath, type, size, uploader, access list), `sosAlerts/{alertId}` (`elderlyId`, createdBy, status, escalation state, dedupe key), `reminders/{reminderId}` (`elderlyId`, schedule, quiet hours, attempts, outcome), `subscriptions/{subscriptionId}`, `transactions/{transactionId}`, `payouts/{payoutId}`, `leaveRequests/{requestId}`, and `auditLogs/{logId}`.
+
+## Authorization strategy
+
+After OTP, retrieve the trusted `users/{uid}` record. Missing, suspended, invalid-role, or missing-profile users receive a safe denial state. Firestore rules should assert `request.auth.uid == uid`, role claims/records, linked elderly membership, assignment ownership, allowed status transitions, field allowlists, and immutable audit metadata. Clients can read only linked elderly profiles, their own bookings, authorized visit feed, medical documents in their access list, SOS status, and subscription view. Staff can read only their assigned tasks and the minimum client details needed for that assignment. Admin data and privileged changes require an admin role verified server-side; users cannot grant themselves admin.
+
+Role changes, assignment/reassignment, SOS creation/escalation, payment/subscription state, payout ledgers, and geofence validation should be Cloud Function endpoints or callable server operations. Storage rules must validate the owner/assignment, document path, content type, and size; disallow directory browsing and cross-elderly access. Do not expose raw card details: use a tokenized provider flow.
+
+## Trusted event flows
+
+1. **OTP role routing:** Firebase Auth completes OTP, server reads `users/{uid}`, checks status/profile, then returns the allowed role and minimal session claims.
+2. **Booking:** client sends requested service/date/address/notes; server validates allowed service type, linked elderly ownership, idempotency key, and creates the booking/audit record.
+3. **Check-in:** staff requests a check-in token; backend checks assignment status, fresh device location/accuracy, permission state, and server-side distance to the assigned home. Reject outside 20 m, stale/inaccurate points, duplicate check-ins, or unassigned tasks; provide dispatch escalation.
+4. **SOS:** client confirms, server verifies linked elderly access, writes a deduplicated alert, notifies configured contacts/assigned staff, and records delivery status. SOS is not a substitute for emergency services.
+5. **Medication reminder:** a scheduler checks quiet hours and valid consent, asks the voice provider to call, records attempt timestamp/provider outcome, retries up to three attempts within 15 minutes, and creates one deduplicated SOS only after the no-response threshold. Provider failure, invalid number, or connectivity issue is surfaced separately from no response.
+6. **Visit completion:** server checks assignment, one-time submission token, required measurements/units, consent for uploads, and allowed transition from in-progress to submitted. It writes the visit and audit record; earnings are derived from trusted records.
+7. **Dispatch:** authorized admin function checks eligible available staff, records acting admin/time/reason/previous/new assignment, and appends an audit log.
+
+## Required configuration and privacy review
+
+Production setup needs Firebase project identifiers, Auth phone provider/OTP settings, Firestore/Storage rules, Cloud Functions runtime, notification delivery, mapping provider, tokenized payments, and voice provider credentials stored in the platform secret manager — never in the app bundle. Review local privacy, consent, data-retention, medical-record handling, accessibility, localization, and emergency-contact requirements before launch. Automated calls and app alerts do not replace emergency services or human care.
+
+## Test plan
+
+Test client/staff/admin isolation, suspended and missing-role routing, Firestore/Storage rules, linked-record access, invalid status transitions, duplicate booking and visit submission, 20 m geofence accuracy/staleness/rejection, SOS idempotency, three-attempt reminder escalation and provider failure, secure logout/session cleanup, offline/retry behavior, upload validation, accessibility labels, and narrow-screen layouts. Keep development/test writes isolated from production data.
