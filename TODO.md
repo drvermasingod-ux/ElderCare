@@ -12,6 +12,7 @@
 
 - [x] Show a linked elderly-parent profile with name, photo treatment, health information, timestamps, and source labels; do not imply vitals are live.
 - [x] Provide a prominent red SOS Emergency action with a confirmation step and visible alert status.
+- [x] Provide a phone-only daily medication reminder control with notification permission handling, an 18:30 schedule, and a local “mark as taken” state; keep family-wide escalation reserved for the trusted backend workflow.
 - [x] Show Today’s Tasks for medication reminders, scheduled visits, and completed/upcoming activities.
 - [x] Offer service booking choices for doctor escort/hospital visits, daily companion visits, medication delivery, home lab collection, and transport assistance, with date, time, address, notes, and status scaffolding.
 - [x] Show tracking/visit update states with last-updated timestamps and explicit consent/freshness language.
