@@ -8,6 +8,16 @@
 - [x] Include secure logout affordances in both role experiences and return to the login/entry state in the demo.
 - [ ] Enforce the same role and ownership boundaries in Firestore Security Rules and trusted backend functions; never trust a role, user ID, assignment, payment status, or other privileged value from the client app.
 
+## Multi-role onboarding and account linking
+
+- [x] Provide one entry screen with separate Login and Sign-Up paths; Login offers Phone OTP, Email, and Social options in the demo UI.
+- [x] During Sign-Up, require a role choice between Parent / Senior Citizen and Child / Family Member, and explain that role-based access is protected.
+- [x] Support the child-first flow: collect parent name, phone number, and basic vitals, then offer Direct Integration, a 6-digit Pair Code app-install flow, or Keypad Phone Mode.
+- [x] Support the parent-first flow: offer child mobile-number invite or a generated 6-digit Invite Code that the child can enter during sign-up.
+- [x] Show completion states for linked family accounts, private code-sharing instructions, and keypad-phone AI voice reminder setup boundaries.
+- [x] Provide a simplified Parent dashboard with large typography, a confirmation-based SOS action, connected-family status, and daily reminder logs; keep the Child dashboard comprehensive for vitals, services, visits, and alerts.
+- [ ] Connect these demo states to Firebase Authentication, trusted role records, expiring one-time codes, SMS/WhatsApp delivery, consent records, and server-side account-linking transactions.
+
 ## Client and family mobile portal
 
 - [x] Show a linked elderly-parent profile with name, photo treatment, health information, timestamps, and source labels; do not imply vitals are live.

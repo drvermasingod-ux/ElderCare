@@ -7,8 +7,8 @@ import { ActionButton, Avatar, Card, Eyebrow, IconBadge, LogoMark, SectionTitle,
 import { MedicationReminderCard } from "@/components/medication-reminder";
 import { clientTasks, familyProfile, palette, roleFromParam, staffVisits, type Role } from "@/lib/eldercare";
 
-function TopBar({ role }: { role: Role }) {
-  return <View style={styles.topBar}><View style={styles.topBrand}><LogoMark compact /><View><Text style={styles.topBrandName}>ElderCare</Text><Text style={styles.topBrandSub}>{role === "staff" ? "Care partner" : "Family portal"}</Text></View></View><Pressable accessibilityLabel="Open alerts" style={styles.bell}><MaterialIcons name="notifications-none" size={22} color={palette.ink} /><View style={styles.bellDot} /></Pressable></View>;
+function TopBar({ role, label }: { role: Role; label?: string }) {
+  return <View style={styles.topBar}><View style={styles.topBrand}><LogoMark compact /><View><Text style={styles.topBrandName}>ElderCare</Text><Text style={styles.topBrandSub}>{label || (role === "staff" ? "Care partner" : "Family portal")}</Text></View></View><Pressable accessibilityLabel="Open alerts" style={styles.bell}><MaterialIcons name="notifications-none" size={22} color={palette.ink} /><View style={styles.bellDot} /></Pressable></View>;
 }
 
 function FamilyHome({ onLogout }: { onLogout: () => void }) {
@@ -30,6 +30,23 @@ function FamilyHome({ onLogout }: { onLogout: () => void }) {
   </ScrollView><Modal transparent visible={sosOpen} animationType="fade" onRequestClose={() => setSosOpen(false)}><View style={styles.modalBackdrop}><View style={styles.modalCard}><View style={styles.modalBadge}><MaterialIcons name="priority-high" size={24} color={palette.terracotta} /></View><Text style={styles.modalTitle}>Send an emergency SOS?</Text><Text style={styles.modalText}>This will notify your configured family contact and Asha’s assigned care partner. It does not contact emergency services.</Text><View style={styles.modalActions}><ActionButton variant="secondary" onPress={() => setSosOpen(false)}>Not now</ActionButton><ActionButton variant="danger" onPress={() => { setSosSent(true); setSosOpen(false); }}>Send SOS alert</ActionButton></View></View></View></Modal></ScreenContainer>;
 }
 
+function ParentHome({ onLogout }: { onLogout: () => void }) {
+  const [sosOpen, setSosOpen] = useState(false);
+  const [sosSent, setSosSent] = useState(false);
+  return <ScreenContainer containerClassName="bg-[#F7F2EA]" safeAreaClassName="bg-[#F7F2EA]"><ScrollView contentContainerStyle={styles.parentScroll} showsVerticalScrollIndicator={false}>
+    <TopBar role="client" label="Parent view" />
+    <Eyebrow>Your home care journal</Eyebrow>
+    <Text style={styles.parentTitle}>Good morning, Asha.</Text>
+    <Text style={styles.parentIntro}>Your family and care partner are keeping a steady eye on today.</Text>
+    <View style={styles.parentSafetyCard}><MaterialIcons name="verified-user" size={22} color={palette.sage} /><View style={{ flex: 1 }}><Text style={styles.parentSafetyTitle}>You are connected</Text><Text style={styles.parentSafetyText}>Meera and Ravi can see your approved care updates.</Text></View></View>
+    <Pressable accessibilityRole="button" accessibilityLabel="Open parent emergency SOS confirmation" onPress={() => setSosOpen(true)} style={({ pressed }) => [styles.parentSosButton, pressed && styles.pressed]}><MaterialIcons name="priority-high" size={35} color={palette.white} /><View style={{ flex: 1 }}><Text style={styles.parentSosTitle}>{sosSent ? "SOS sent" : "Emergency SOS"}</Text><Text style={styles.parentSosText}>{sosSent ? "Your family contact has been notified." : "Press only when you need immediate human help."}</Text></View><MaterialIcons name="arrow-forward-ios" size={20} color={palette.white} /></Pressable>
+    <Text style={styles.parentSectionTitle}>Today’s reminder log</Text>
+    <Card style={styles.parentLogCard}><View style={styles.parentLogRow}><Text style={styles.parentLogTime}>08:00</Text><View style={styles.parentLogDot}><MaterialIcons name="check" size={14} color={palette.white} /></View><View style={styles.parentLogCopy}><Text style={styles.parentLogTitle}>Morning medicine</Text><Text style={styles.parentLogText}>Confirmed with breakfast</Text></View><StatusPill label="Done" tone="good" /></View><View style={styles.parentLogRule} /><View style={styles.parentLogRow}><Text style={styles.parentLogTime}>09:12</Text><View style={styles.parentLogDot}><MaterialIcons name="check" size={14} color={palette.white} /></View><View style={styles.parentLogCopy}><Text style={styles.parentLogTitle}>Health check</Text><Text style={styles.parentLogText}>Ravi recorded your blood pressure</Text></View><StatusPill label="Logged" tone="good" /></View><View style={styles.parentLogRule} /><View style={styles.parentLogRow}><Text style={styles.parentLogTime}>18:30</Text><View style={styles.parentLogDotUpcoming} /><View style={styles.parentLogCopy}><Text style={styles.parentLogTitle}>Evening medicine</Text><Text style={styles.parentLogText}>A gentle reminder will arrive</Text></View><StatusPill label="Next" tone="warm" /></View></Card>
+    <ActionButton variant="secondary" icon="family-restroom" onPress={() => {}}>Family is connected</ActionButton>
+    <Pressable onPress={onLogout} style={styles.logoutInline}><MaterialIcons name="logout" size={18} color={palette.terracotta} /><Text style={styles.logoutText}>Sign out</Text></Pressable>
+  </ScrollView><Modal transparent visible={sosOpen} animationType="fade" onRequestClose={() => setSosOpen(false)}><View style={styles.modalBackdrop}><View style={styles.modalCard}><View style={styles.modalBadge}><MaterialIcons name="priority-high" size={24} color={palette.terracotta} /></View><Text style={styles.modalTitle}>Send an emergency SOS?</Text><Text style={styles.modalText}>This will notify your configured family contact and assigned care partner. It does not contact emergency services.</Text><View style={styles.modalActions}><ActionButton variant="secondary" onPress={() => setSosOpen(false)}>Not now</ActionButton><ActionButton variant="danger" onPress={() => { setSosSent(true); setSosOpen(false); }}>Send SOS alert</ActionButton></View></View></View></Modal></ScreenContainer>;
+}
+
 function StaffHome({ onLogout }: { onLogout: () => void }) {
   const router = useRouter();
   const [checkedIn, setCheckedIn] = useState(false);
@@ -46,14 +63,17 @@ function StaffHome({ onLogout }: { onLogout: () => void }) {
 }
 
 export default function HomeScreen() {
-  const params = useGlobalSearchParams<{ role?: string | string[] }>();
+  const params = useGlobalSearchParams<{ role?: string | string[]; persona?: string | string[] }>();
   const role = roleFromParam(params.role);
   const router = useRouter();
-  return role === "staff" ? <StaffHome onLogout={() => router.replace("/")} /> : <FamilyHome onLogout={() => router.replace("/")} />;
+  const persona = Array.isArray(params.persona) ? params.persona[0] : params.persona;
+  if (role === "staff") return <StaffHome onLogout={() => router.replace("/")} />;
+  return persona === "parent" ? <ParentHome onLogout={() => router.replace("/")} /> : <FamilyHome onLogout={() => router.replace("/")} />;
 }
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 18, paddingTop: 12, paddingBottom: 36 },
+  parentScroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 36 },
   topBar: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: 26 },
   topBrand: { alignItems: "center", flexDirection: "row", gap: 9 },
   topBrandName: { color: palette.ink, fontFamily: "serif", fontSize: 18, fontWeight: "700" },
@@ -131,4 +151,22 @@ const styles = StyleSheet.create({
   modalTitle: { color: palette.ink, fontFamily: "serif", fontSize: 25, fontWeight: "700", marginTop: 14 },
   modalText: { color: palette.inkSoft, fontSize: 13, lineHeight: 20, marginTop: 8 },
   modalActions: { flexDirection: "row", gap: 10, marginTop: 21 },
+  parentTitle: { color: palette.ink, fontFamily: "serif", fontSize: 34, fontWeight: "700", lineHeight: 40, marginTop: 8 },
+  parentIntro: { color: palette.inkSoft, fontSize: 15, lineHeight: 23, marginTop: 7 },
+  parentSafetyCard: { alignItems: "center", backgroundColor: palette.sageWash, borderRadius: 17, flexDirection: "row", gap: 11, marginTop: 22, padding: 14 },
+  parentSafetyTitle: { color: palette.ink, fontSize: 14, fontWeight: "800" },
+  parentSafetyText: { color: palette.darkMuted, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  parentSosButton: { alignItems: "center", backgroundColor: palette.terracotta, borderRadius: 22, flexDirection: "row", gap: 14, marginTop: 18, padding: 20 },
+  parentSosTitle: { color: palette.white, fontSize: 20, fontWeight: "900" },
+  parentSosText: { color: "#FDE8E3", fontSize: 12, lineHeight: 18, marginTop: 4 },
+  parentSectionTitle: { color: palette.ink, fontFamily: "serif", fontSize: 23, fontWeight: "700", marginBottom: 12, marginTop: 28 },
+  parentLogCard: { paddingVertical: 8 },
+  parentLogRow: { alignItems: "center", minHeight: 67, flexDirection: "row", gap: 10 },
+  parentLogTime: { color: palette.muted, fontSize: 11, fontWeight: "800", width: 39 },
+  parentLogDot: { alignItems: "center", backgroundColor: palette.sage, borderRadius: 9, height: 18, justifyContent: "center", width: 18 },
+  parentLogDotUpcoming: { backgroundColor: palette.line, borderRadius: 9, height: 18, width: 18 },
+  parentLogCopy: { flex: 1 },
+  parentLogTitle: { color: palette.ink, fontSize: 14, fontWeight: "800" },
+  parentLogText: { color: palette.muted, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  parentLogRule: { backgroundColor: palette.line, height: 1, marginLeft: 49 },
 });

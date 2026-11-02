@@ -42,3 +42,9 @@ Brand essence: a family’s calm operational companion for ageing at home — re
 ## Known boundaries
 
 Firebase phone OTP, role retrieval, strict Firestore/Storage rules, trusted geofence validation, Twilio outbound reminders, real maps, uploads, payment tokenization, and admin web routes are documented integration requirements, not falsely represented as active in this demo slice. Emergency automation must never replace local emergency services or human care.
+
+## Onboarding extension
+
+The entry route now acts as a guided state machine rather than a direct role preview. It separates Login from Sign-Up, offers phone OTP/email/social method choices, collects a role choice during sign-up, and routes child-first versus parent-first linking into explicit screens. Child-first onboarding captures the parent profile and offers direct verified-number matching, a 6-digit Pair Code app flow, or keypad-phone mode. Parent-first onboarding offers a child-mobile invite or a 6-digit Invite Code. These are UI/demo states only until Firebase Auth, expiring server-issued codes, SMS/WhatsApp delivery, consent records, and atomic linking transactions are connected.
+
+The child/family dashboard remains the comprehensive care-operations view. A new parent persona uses large type, a prominent confirmation-based SOS, a connected-family banner, and a short daily reminder log; parent-only navigation hides visits and the medical vault in the tab shell. The selected visual movement remains Quiet Heritage Care: the parent experience uses the same ivory paper, indigo ink, sage trust signal, and terracotta urgency color, with fewer choices and larger touch targets.
