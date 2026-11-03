@@ -51,3 +51,13 @@
 - [x] Include loading/empty/success/offline/permission-denied/error copy in the mobile shell where applicable.
 - [ ] Add automated coverage for role isolation, security rules, geofence checks, alert retries, duplicate submissions, and logout.
 - [x] Keep the app runnable on the fixed Expo/Metro 8081 and API 3000 runtime with no production secrets in source.
+
+
+## Free-tier infrastructure and provider integrations
+
+- [ ] Store profile pictures, staff visit photos, prescriptions, and medical-vault files in a Cloudflare R2 bucket through backend-generated short-lived S3-compatible presigned upload/download URLs; do not use Firebase Storage for media.
+- [ ] Integrate Firebase Authentication with phone OTP and Email/Password for `client`, `staff`, and `admin` roles; use Firestore collections for users, bookings, tasks, vitals, and audit records; use FCM for emergency and staff-dispatch push notifications.
+- [ ] Add Gemini-backed natural-language check-ins and structured medication reminder scripts, Google Cloud TTS/STT for Hindi/regional voice prompts and response transcription, and Twilio/Exotel outbound call adapters for scheduled keypad-phone reminders.
+- [ ] Add protected payment adapters for Razorpay domestic UPI/cards/NetBanking plus EMI/Pay Later partner handoff, and Stripe international cards with tokenized recurring billing for NRI families.
+- [ ] Add Google Maps distance/route adapters for staff GPS, home locations, and hospital routes, plus Meta WhatsApp Cloud API templates/webhooks for consented Auto-SOS, health updates, and visit completion reports.
+- [x] Keep provider credentials server-only, expose non-secret integration readiness status, fail closed when a provider is unconfigured, and document all activation boundaries without placing keys in the app bundle.

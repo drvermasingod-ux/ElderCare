@@ -34,3 +34,12 @@ Production setup needs Firebase project identifiers, Auth phone provider/OTP set
 ## Test plan
 
 Test client/staff/admin isolation, suspended and missing-role routing, Firestore/Storage rules, linked-record access, invalid status transitions, duplicate booking and visit submission, 20 m geofence accuracy/staleness/rejection, SOS idempotency, three-attempt reminder escalation and provider failure, secure logout/session cleanup, offline/retry behavior, upload validation, accessibility labels, and narrow-screen layouts. Keep development/test writes isolated from production data.
+
+
+## Infrastructure adapter surface
+
+The server now exposes a non-secret `GET /api/integrations/status` readiness endpoint and the equivalent `integrations.status` tRPC query. Protected procedures cover R2 upload/download URL issuance, Gemini reminder-script generation, Google TTS/STT, admin-only Twilio voice queueing, Google Maps distance lookup, admin-only WhatsApp messaging, and protected Razorpay/Stripe checkout creation. The client receives only short-lived signed URLs or provider result IDs; provider keys never enter the Expo bundle.
+
+Configure adapters through server-only environment variables such as `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `GEMINI_API_KEY`, `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_ACCESS_TOKEN`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VOICE_FROM`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `STRIPE_SECRET_KEY`, `GOOGLE_MAPS_API_KEY`, `WHATSAPP_ACCESS_TOKEN`, and `WHATSAPP_PHONE_NUMBER_ID`. Missing configuration fails closed or returns `configured: false`; demo UI data is not treated as a live provider result.
+
+Before production activation, add Firebase Admin token verification and Firestore/FCM implementation behind the same trusted boundary, configure webhook signature verification for Razorpay, Stripe, Twilio/Exotel, and WhatsApp, add idempotency keys and audit writes for every outbound action, and obtain explicit voice/SMS/WhatsApp consent from the parent and family recipient.
