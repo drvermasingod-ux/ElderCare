@@ -31,7 +31,7 @@ const env = {
   appName: "ElderCare Companion",
   appSlug: "eldercare",
   // Durable project logo metadata; native launcher assets live under assets/images.
-  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663838475378/jCKddKCCzOJPRCbg.png",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663838475378/dhAkvdRKcoRjUNHS.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -64,7 +64,7 @@ const config: ExpoConfig = {
   version: "1.0.0",
   extra: publicRuntime,
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/images/eldercare-icon.png",
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
   ios: {
@@ -126,9 +126,9 @@ const config: ExpoConfig = {
         image: "./assets/images/splash-icon.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#F7F2EA",
         dark: {
-          backgroundColor: "#000000",
+          backgroundColor: "#17324D",
         },
       },
     ],

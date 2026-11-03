@@ -1,16 +1,10 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View, type PressableProps } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View, type PressableProps } from "react-native";
 import { palette } from "@/lib/eldercare";
 
 export function LogoMark({ compact = false }: { compact?: boolean }) {
-  return (
-    <View style={[styles.logoWrap, compact && styles.logoWrapCompact]}>
-      <View style={styles.logoLeafOne} />
-      <View style={styles.logoLeafTwo} />
-      <View style={styles.logoWindow} />
-    </View>
-  );
+  return <View style={[styles.logoWrap, compact && styles.logoWrapCompact]}><Image accessibilityLabel="ElderCare Companion logo" source={require("@/assets/images/eldercare-mark.png")} resizeMode="contain" style={styles.logoImage} /></View>;
 }
 
 export function Eyebrow({ children }: { children: ReactNode }) {
@@ -65,9 +59,7 @@ export function FieldLabel({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   logoWrap: { width: 42, height: 42, borderRadius: 14, backgroundColor: palette.ink, overflow: "hidden", position: "relative" },
   logoWrapCompact: { width: 34, height: 34, borderRadius: 11 },
-  logoLeafOne: { position: "absolute", width: 14, height: 24, borderRadius: 14, backgroundColor: palette.sage, transform: [{ rotate: "-28deg" }], left: 6, top: 5 },
-  logoLeafTwo: { position: "absolute", width: 12, height: 20, borderRadius: 12, backgroundColor: "#D4B76A", transform: [{ rotate: "28deg" }], right: 7, top: 8 },
-  logoWindow: { position: "absolute", width: 12, height: 12, borderRadius: 3, borderWidth: 2, borderColor: palette.ivory, left: 15, bottom: 7 },
+  logoImage: { height: "100%", width: "100%" },
   eyebrow: { color: palette.muted, fontSize: 11, fontWeight: "700", letterSpacing: 1.2, textTransform: "uppercase" },
   sectionTitleRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
   sectionTitle: { color: palette.ink, fontFamily: "serif", fontSize: 21, fontWeight: "700" },
