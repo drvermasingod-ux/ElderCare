@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build:server
-    startCommand: pnpm start
+    buildCommand: npm install --global pnpm@9.12.0 && pnpm install --frozen-lockfile && pnpm build:server
+    startCommand: node dist/index.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:

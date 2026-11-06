@@ -1,6 +1,6 @@
 # Render backend deployment
 
-The backend is a Node.js/Express service in the repository root. Render should build it with `pnpm build:server`, start it with `pnpm start`, and use `GET /api/health` as its health check. `render.yaml` defines a Free web service named `eldercare-api` and prompts for secrets instead of committing their values.
+The backend is a Node.js/Express service in the repository root. Render installs the pinned pnpm version non-interactively, runs `pnpm install --frozen-lockfile` and `pnpm build:server`, starts the compiled bundle with `node dist/index.js`, and uses `GET /api/health` as its health check. `render.yaml` defines a Free web service named `eldercare-api` and prompts for secrets instead of committing their values.
 
 ## Render setup
 

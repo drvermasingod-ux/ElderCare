@@ -12,5 +12,6 @@
 
 - [x] Confirm the backend entrypoint is `pnpm build:server` followed by `pnpm start`, with `GET /api/health` available for a service health check.
 - [x] Add a Render Free Blueprint with root repository settings, Node pinning, build/start commands, health check, and Firebase/R2 secret declarations.
+- [x] Make the Render build non-interactive by installing the pinned pnpm version explicitly and starting the compiled Node bundle directly.
 - [ ] Create the Render Blueprint from the connected GitHub repository and supply the Firebase Admin values without committing secrets.
 - [ ] Verify the deployed `/api/health` response and connect the resulting API URL to the Expo preview build and website admin API.
