@@ -8,7 +8,7 @@
     "dev:server": "cross-env PORT=3000 NODE_ENV=development tsx watch server/_core/index.ts",
     "dev:metro": "cross-env EXPO_USE_METRO_WORKSPACE_ROOT=1 EXPO_PORT=8081 npx expo start --web --port 8081",
     "build": "npx expo export --platform web --output-dir build/web",
-    "build:website": "rm -rf website-dist && cp -R website website-dist",
+    "build:website": "node website/build.mjs",
     "build:server": "esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "build:apk:preview": "npx eas-cli build --platform android --profile preview",
     "build:android:local": "npx expo prebuild --platform android && cd android && ./gradlew assembleRelease",

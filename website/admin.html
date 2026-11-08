@@ -1,7 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="robots" content="noindex,nofollow" /><link rel="icon" href="/assets/favicon.png" /><link rel="stylesheet" href="/styles.css" /><title>Admin Console | ElderCare Companion</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="/assets/favicon.png" />
+  <link rel="stylesheet" href="/styles.css" />
+  <title>Admin unavailable | ElderCare Companion</title>
+</head>
 <body class="admin-body">
-  <main class="admin-shell"><header class="admin-header"><a class="brand" href="/"><img src="/assets/logo.png" alt="ElderCare Companion" /></a><span class="admin-badge">Admin console</span><a class="text-link" href="/">View landing page ↗</a></header><section class="admin-gate"><p class="eyebrow">Private operations view</p><h1>Keep the care network visible.</h1><p>This console is reserved for verified administrators. Live download, payment, support, and user data will load only after Firebase Admin authentication is connected.</p><div class="gate-row"><span class="lock">⌁</span><div><strong>Secure sign-in required</strong><small>No data is shown in this preview shell.</small></div><button class="button button-primary" type="button" onclick="showAdminNotice()">Sign in to admin</button></div></section><section class="admin-grid" aria-label="Admin metrics preview"><article class="metric"><span>App downloads</span><strong>—</strong><small>Waiting for analytics bridge</small></article><article class="metric"><span>Payment issues</span><strong>—</strong><small>Waiting for webhook bridge</small></article><article class="metric"><span>Support queue</span><strong>—</strong><small>Waiting for support records</small></article></section><section class="admin-table"><div class="table-heading"><div><p class="eyebrow">Operational signals</p><h2>What will live here</h2></div><span class="status-pill">Preview only</span></div><div class="empty-state"><span>◌</span><h3>Admin data is not connected yet.</h3><p>Next production step: Firebase Admin authentication, Firestore audit queries, download analytics, payment webhooks, and role-protected API routes.</p></div></section><footer class="admin-footer"><span>Keep this route private in production.</span><span>ElderCare Companion · Admin boundary</span></footer></main><script src="/admin.js"></script>
+  <main class="admin-shell">
+    <header class="admin-header"><a class="brand" href="/"><img src="/assets/logo.png" alt="ElderCare Companion" /></a><a class="text-link" href="/">Back to website</a></header>
+    <section class="admin-gate">
+      <p class="eyebrow">Restricted operations</p>
+      <h1>Admin access is not enabled.</h1>
+      <p>This static website does not authenticate administrators. No operational data is requested or displayed here. The dashboard will remain unavailable until verified Firebase sessions and server-enforced admin authorization are in place.</p>
+      <div class="gate-row"><span class="lock" aria-hidden="true">⌁</span><div><strong>No admin session established</strong><small>No data was loaded and no sign-in was attempted.</small></div></div>
+    </section>
+    <footer class="admin-footer"><span>This page is an unavailable notice, not an admin dashboard.</span><span>ElderCare Companion</span></footer>
+  </main>
 </body>
 </html>

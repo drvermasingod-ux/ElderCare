@@ -62,6 +62,8 @@ Thumbs.db
 *.tgz
 *.tar.gz
 .cache/
+/build/
+website/dist/
 website-dist/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)

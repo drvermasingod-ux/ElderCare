@@ -220,10 +220,10 @@ export default function OAuthCallback() {
         {status === "success" && (
           <>
             <Text className="text-base leading-6 text-center text-foreground">
-              Authentication successful!
+              Sign-in provider returned a session.
             </Text>
             <Text className="text-base leading-6 text-center text-foreground">
-              Redirecting...
+              Verifying your account and role with the service before opening care features…
             </Text>
           </>
         )}

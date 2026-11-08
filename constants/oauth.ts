@@ -16,7 +16,10 @@ const env = {
   appId: extra.appId ?? process.env.EXPO_PUBLIC_APP_ID ?? "",
   ownerId: process.env.EXPO_PUBLIC_OWNER_OPEN_ID ?? "",
   ownerName: process.env.EXPO_PUBLIC_OWNER_NAME ?? "",
-  apiBaseUrl: extra.apiBaseUrl ?? process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
+  apiBaseUrl:
+    extra.apiBaseUrl ||
+    process.env.EXPO_PUBLIC_API_BASE_URL ||
+    "https://eldercare-api-vaee.onrender.com",
   deepLinkScheme: schemeFromBundleId,
 };
 
@@ -27,29 +30,9 @@ export const OWNER_OPEN_ID = env.ownerId;
 export const OWNER_NAME = env.ownerName;
 export const API_BASE_URL = env.apiBaseUrl;
 
-/**
- * Get the API base URL, deriving from current hostname if not set.
- * Metro runs on 8081, API server runs on 3000.
- * URL pattern: https://PORT-sandboxid.region.domain
- */
+/** Return the single configured public API origin; never silently use same-origin demo/preview routes. */
 export function getApiBaseUrl(): string {
-  // If API_BASE_URL is set, use it
-  if (API_BASE_URL) {
-    return API_BASE_URL.replace(/\/$/, "");
-  }
-
-  // On web, derive from current hostname by replacing port 8081 with 3000
-  if (ReactNative.Platform.OS === "web" && typeof window !== "undefined" && window.location) {
-    const { protocol, hostname } = window.location;
-    // Pattern: 8081-sandboxid.region.domain -> 3000-sandboxid.region.domain
-    const apiHostname = hostname.replace(/^8081-/, "3000-");
-    if (apiHostname !== hostname) {
-      return `${protocol}//${apiHostname}`;
-    }
-  }
-
-  // Fallback to empty (will use relative URL)
-  return "";
+  return API_BASE_URL.trim().replace(/\/+$/, "");
 }
 
 export const SESSION_TOKEN_KEY = "app_session_token";

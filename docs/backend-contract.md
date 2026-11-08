@@ -1,6 +1,6 @@
 # ElderCare backend contract
 
-This mobile slice intentionally uses sample data. The following contract is the implementation boundary for the production Firebase build; the UI must not claim these services are live until configured and tested.
+The current mobile frontend fails closed and displays no sample care records. Firebase Authentication, Firestore care-domain routes, and this proposed production contract are not implemented or verified by the current API. The contract below is a target boundary; the UI must not claim these services are live until configured and tested.
 
 ## Architecture and ownership
 
@@ -23,7 +23,7 @@ Role changes, assignment/reassignment, SOS creation/escalation, payment/subscrip
 5. **Check-in:** staff requests a check-in token; backend checks assignment status, fresh device location/accuracy, permission state, and server-side distance to the assigned home. Reject outside 20 m, stale/inaccurate points, duplicate check-ins, or unassigned tasks; provide dispatch escalation.
 6. **SOS:** client confirms, server verifies linked elderly access, writes a deduplicated alert, notifies configured contacts/assigned staff, and records delivery status. SOS is not a substitute for emergency services.
 7. **Medication reminder:** a scheduler checks quiet hours and valid consent, asks the voice provider to call, records attempt timestamp/provider outcome, retries up to three attempts within 15 minutes, and creates one deduplicated SOS only after the no-response threshold. Provider failure, invalid number, or connectivity issue is surfaced separately from no response.
-   The current mobile slice also offers an on-device daily 18:30 reminder using Expo Notifications. That local reminder is intentionally separate from the trusted family-wide escalation workflow; the UI labels it as phone-only and does not claim that a dose was reliably taken.
+   The current mobile UI does not schedule reminders or claim a dose was taken. Enable reminders only after a consented, persisted schedule and a tested delivery workflow are available.
 6. **Visit completion:** server checks assignment, one-time submission token, required measurements/units, consent for uploads, and allowed transition from in-progress to submitted. It writes the visit and audit record; earnings are derived from trusted records.
 7. **Dispatch:** authorized admin function checks eligible available staff, records acting admin/time/reason/previous/new assignment, and appends an audit log.
 
