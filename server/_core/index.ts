@@ -29,7 +29,12 @@ async function startServer() {
 
   app.get("/api/integrations/status", (_req, res) => {
     const integrations = getIntegrationStatus();
-    res.json({ ok: true, integrations, configuredCount: integrations.filter((item) => item.configured).length });
+    res.json({
+      ok: true,
+      integrations,
+      configuredCount: integrations.filter((item) => item.configured).length,
+      productionReadyCount: integrations.filter((item) => item.productionReady).length,
+    });
   });
 
   app.use(

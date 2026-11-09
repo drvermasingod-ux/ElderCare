@@ -4,6 +4,8 @@ import {
 } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { isOwnedPrivateMediaKey } from "./_core/mediaAccess";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   createR2DownloadUrl,
@@ -47,7 +49,12 @@ export const appRouter = router({
         }),
       createDownloadUrl: protectedProcedure
         .input(z.object({ key: z.string().min(1).max(512) }))
-        .mutation(async ({ input }) => createR2DownloadUrl(input.key)),
+        .mutation(async ({ ctx, input }) => {
+          if (!isOwnedPrivateMediaKey(input.key, ctx.user.id)) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "File access denied." });
+          }
+          return createR2DownloadUrl(input.key);
+        }),
     }),
     ai: router({
       reminderScript: protectedProcedure

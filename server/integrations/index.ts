@@ -5,6 +5,8 @@ import { ENV } from "../_core/env";
 export type IntegrationStatus = {
   provider: string;
   configured: boolean;
+  implementation: "adapter-only" | "not-implemented";
+  productionReady: false;
   mode: "server-only";
   notes: string;
 };
@@ -15,15 +17,15 @@ function configured(...values: string[]) {
 
 export function getIntegrationStatus(): IntegrationStatus[] {
   return [
-    { provider: "Cloudflare R2", configured: configured(ENV.r2AccountId, ENV.r2AccessKeyId, ENV.r2SecretAccessKey, ENV.r2Bucket), mode: "server-only", notes: "Presigned profile, visit-photo, and medical-vault media URLs." },
-    { provider: "Firebase Auth / Firestore / FCM", configured: configured(ENV.firebaseProjectId, ENV.firebaseClientEmail, ENV.firebasePrivateKey), mode: "server-only", notes: "RBAC, real-time records, push notification boundary." },
-    { provider: "Google Gemini", configured: Boolean(ENV.geminiApiKey), mode: "server-only", notes: "Conversational check-ins and structured reminder scripts." },
-    { provider: "Google Cloud TTS / STT", configured: configured(ENV.googleCloudProjectId, ENV.googleCloudAccessToken), mode: "server-only", notes: "Hindi/regional voice prompts and response transcription." },
-    { provider: "Twilio Voice / Exotel", configured: configured(ENV.twilioAccountSid, ENV.twilioAuthToken, ENV.twilioVoiceFrom) || Boolean(ENV.exotelApiKey), mode: "server-only", notes: "Scheduled keypad-phone reminder calls." },
-    { provider: "Razorpay", configured: configured(ENV.razorpayKeyId, ENV.razorpayKeySecret), mode: "server-only", notes: "India UPI, cards, NetBanking, EMI/Pay Later partner handoff." },
-    { provider: "Stripe", configured: Boolean(ENV.stripeSecretKey), mode: "server-only", notes: "International tokenized recurring billing." },
-    { provider: "Google Maps", configured: Boolean(ENV.googleMapsApiKey), mode: "server-only", notes: "Distance, staff GPS, and hospital route calculations." },
-    { provider: "WhatsApp Cloud API", configured: configured(ENV.whatsappAccessToken, ENV.whatsappPhoneNumberId), mode: "server-only", notes: "Consent-based Auto-SOS and visit reports." },
+    { provider: "Cloudflare R2", configured: configured(ENV.r2AccountId, ENV.r2AccessKeyId, ENV.r2SecretAccessKey, ENV.r2Bucket), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Signed URL adapter only; file metadata, consent, relationship access, and retention workflows are not implemented." },
+    { provider: "Firebase Auth / Firestore / FCM", configured: configured(ENV.firebaseProjectId, ENV.firebaseClientEmail, ENV.firebasePrivateKey), implementation: "not-implemented", productionReady: false, mode: "server-only", notes: "Environment-variable presence does not enable Firebase Auth token verification, Firestore, or FCM; those server workflows are not implemented." },
+    { provider: "Google Gemini", configured: Boolean(ENV.geminiApiKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Text-generation adapter only; care check-in and reminder delivery workflows are not implemented." },
+    { provider: "Google Cloud TTS / STT", configured: configured(ENV.googleCloudProjectId, ENV.googleCloudAccessToken), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Speech API adapters only; consented care workflows are not implemented." },
+    { provider: "Twilio Voice / Exotel", configured: configured(ENV.twilioAccountSid, ENV.twilioAuthToken, ENV.twilioVoiceFrom) || Boolean(ENV.exotelApiKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Provider-call adapter only; no persisted schedule, consent, retry, or escalation workflow." },
+    { provider: "Razorpay", configured: configured(ENV.razorpayKeyId, ENV.razorpayKeySecret), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Order-creation adapter only; no catalog-priced entitlement or verified webhook workflow." },
+    { provider: "Stripe", configured: Boolean(ENV.stripeSecretKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Checkout adapter only; no verified webhook or entitlement reconciliation workflow." },
+    { provider: "Google Maps", configured: Boolean(ENV.googleMapsApiKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Distance API adapter only; no assignment/geofence workflow." },
+    { provider: "WhatsApp Cloud API", configured: configured(ENV.whatsappAccessToken, ENV.whatsappPhoneNumberId), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Message-send adapter only; consent, delivery tracking, and audit workflows are not implemented." },
   ];
 }
 
@@ -60,7 +62,7 @@ export async function createR2DownloadUrl(keyInput: string) {
 
 export async function generateReminderScript(input: { elderName: string; medicine: string; language?: string; context?: string }) {
   if (!ENV.geminiApiKey) {
-    return { configured: false, text: `Namaste ${input.elderName}, यह ${input.medicine} लेने का समय है। कृपया दवा लेने के बाद परिवार को बताएं।`, model: "demo-fallback" };
+    return { configured: false, text: null, model: "disabled" };
   }
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ENV.geminiModel)}:generateContent?key=${encodeURIComponent(ENV.geminiApiKey)}`;
   const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: `Create one short, respectful ${input.language || "Hindi"} medication reminder for an elderly person. Elder name: ${input.elderName}. Medicine: ${input.medicine}. Context: ${input.context || "scheduled reminder"}. Do not claim emergency help or medical advice.` }] }] }) });

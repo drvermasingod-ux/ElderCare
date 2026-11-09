@@ -25,6 +25,8 @@ beforeEach(() => {
   // a platform URL cannot leak into a case that intentionally exercises only loopback data.
   vi.stubEnv("EXPO_PACKAGER_PROXY_URL", "");
   vi.stubEnv("EXPO_WEB_PREVIEW_URL", "");
+  vi.stubEnv("PUBLIC_APP_URL", "");
+  vi.stubEnv("PUBLIC_APP_URLS", "");
 });
 
 afterEach(async () => {
@@ -74,6 +76,36 @@ describe("Mobile API origin and cookie isolation", () => {
       "https://8081-sandbox.region.preview.example.test",
       "https://8328-sandbox.region.preview.example.test",
     ]);
+  });
+
+  it("allows only exact HTTPS origins listed for Pages and a custom domain", async () => {
+    vi.stubEnv("PUBLIC_APP_URLS", "https://eldercare.pages.dev, https://care.example.com");
+    const allowedOrigins = trustedExpoWebOrigins();
+    expect([...allowedOrigins].sort()).toEqual([
+      "https://care.example.com",
+      "https://eldercare.pages.dev",
+    ]);
+
+    const base = await testServer(true, allowedOrigins);
+    for (const origin of ["https://eldercare.pages.dev", "https://care.example.com"]) {
+      const response = await fetch(`${base}/read`, { headers: { Origin: origin } });
+      expect(response.status).toBe(200);
+      expect(response.headers.get("access-control-allow-origin")).toBe(origin);
+    }
+
+    const unlisted = await fetch(`${base}/read`, {
+      headers: { Origin: "https://unlisted.example.com" },
+    });
+    expect(unlisted.status).toBe(403);
+  });
+
+  it.each([
+    "http://eldercare.pages.dev",
+    "https://eldercare.pages.dev/path",
+    "https://eldercare.pages.dev/",
+  ])("ignores a non-canonical or insecure public app origin: %s", (origin) => {
+    vi.stubEnv("PUBLIC_APP_URLS", origin);
+    expect(trustedExpoWebOrigins()).not.toContain(origin);
   });
 
   it.each(["GET", "POST", "OPTIONS"])(
