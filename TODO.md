@@ -32,6 +32,18 @@
 - [ ] Configure secrets only in their server/build provider secret managers, then run real API/auth/authorization checks. Build an EAS internal Android APK, install it on a physical phone and verify login, role routing, linking, permissions, storage, offline recovery, reminders and SOS before any public release.
 - [ ] Configure Cloudflare Pages and verify the actual `pages.dev` or custom domain. Set its root to `website`, build command `node build.mjs`, output `dist`, branch `main`, and only public `VITE_API_URL`/approved `PUBLIC_DOWNLOAD_URL` values. Set the exact allowed website origin in Render for CORS.
 
+## User-provided mobile UI reference
+
+- [x] Match the supplied mobile screenshot's ElderCare hand-heart brand mark and calm phone-sized layout: pale blue background, white rounded cards, navy headings, teal primary controls/status elements and a clear bottom navigation, while retaining readable type and touch targets.
+- [x] Present the welcome/secure-access entry with separate Sign in and Create account affordances, but never show “Demo Mode (Mock Auth)” or create a session/account/send an OTP unless the real configured authentication provider confirms it. Until then explain the unavailable state without collecting phone numbers that cannot be used.
+- [x] Add the protected elder/caregiver profile visual preview with read-only placeholders; it does not accept or persist sensitive data. A real authorized save flow remains blocked on Firebase/backend implementation.
+- [ ] Enable elder/caregiver profile creation or editing only after verified authentication, consent and a real authorized save route; do not accept or locally persist sensitive profile/medical data as a visual demo.
+- [x] Build a care overview with cards for care status, next medication, recent activity and linked profiles; show only server-authorized data, or truthful empty/unavailable states with no sample names, health values, statuses or recent events.
+- [x] Provide a medication screen in the reference's Morning/Afternoon/Evening structure, but only show schedules loaded from the authorized API; do not mark a dose taken, create reminders or reschedule anything without a server/provider confirmation.
+- [x] Provide health/SOS cards for heart rate, steps and location only when real device/provider permission and data are connected. Keep SOS unavailable until a real authorized alert endpoint exists; never imply an alert was sent and retain the local-emergency-services notice.
+- [x] Provide a family/caregiver screen with an honest empty/unavailable state; generate an invitation only through the server's authenticated, consented, expiring single-use linking flow—never use example contacts or fixed invitation codes.
+- [x] Keep visits and the medical vault as protected secondary app screens. Keep the Admin Portal and app-download/store/QR panels on the separate website; do not expose demo admin metrics or fake APK/store links inside the mobile app.
+
 ## Existing APK preparation outcomes
 
 - [x] Preserve the existing Expo Router React Native mobile app separately from the website package and retain the ElderCare native branding.

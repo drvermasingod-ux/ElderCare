@@ -1,8 +1,8 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useEffect, useState } from "react";
-import { Card, Eyebrow, LogoMark } from "@/components/care-ui";
-import { ScreenContainer } from "@/components/screen-container";
+import { ActivityIndicator, Text, View } from "react-native";
+import { Card, StatusPill } from "@/components/care-ui";
+import { CareScreen } from "@/components/care-screen";
 import { checkApiHealth, type ApiHealth } from "@/lib/api-health";
 import { palette } from "@/lib/eldercare";
 
@@ -16,35 +16,24 @@ export function FeatureUnavailable({ title, description }: { title: string; desc
     return () => { active = false; };
   }, []);
 
+  const statusLabel = apiHealth === "checking" ? "CHECKING" : apiHealth === "available" ? "API REACHABLE" : "UNAVAILABLE";
   return (
-    <ScreenContainer containerClassName="bg-[#F7F2EA]" safeAreaClassName="bg-[#F7F2EA]">
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.brandRow}><LogoMark compact /><Text style={styles.brand}>ElderCare Companion</Text></View>
-        <Eyebrow>Protected care service</Eyebrow>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
-        <Card style={styles.card}>
-          <View style={styles.statusRow}>
-            {apiHealth === "checking" ? <ActivityIndicator color={palette.terracotta} /> : <MaterialIcons name={apiHealth === "available" ? "cloud-done" : "cloud-off"} size={20} color={apiHealth === "available" ? palette.sage : palette.terracotta} />}
-            <Text style={styles.statusTitle}>{apiHealth === "checking" ? "Checking service" : apiHealth === "available" ? "API reachable" : "Service temporarily unavailable"}</Text>
-          </View>
-          <Text style={styles.note}>No sample records are shown. API reachability does not confirm that Firebase authentication, care data or this feature is enabled.</Text>
-        </Card>
-        <Text style={styles.emergency}>This app is not a replacement for local emergency services.</Text>
-      </ScrollView>
-    </ScreenContainer>
+    <CareScreen eyebrow="Protected care service" title={title} subtitle={description}>
+      <Card style={{ gap: 12 }}>
+        <View style={{ alignItems: "center", flexDirection: "row", gap: 9 }}>
+          {apiHealth === "checking"
+            ? <ActivityIndicator color={palette.primary} />
+            : <MaterialIcons name={apiHealth === "available" ? "cloud-done" : "cloud-off"} size={20} color={apiHealth === "available" ? palette.primary : palette.terracotta} />}
+          <StatusPill label={statusLabel} tone={apiHealth === "available" ? "good" : "warm"} />
+        </View>
+        <View style={{ backgroundColor: palette.line, height: 1 }} />
+        <View style={{ alignItems: "flex-start", flexDirection: "row", gap: 8 }}>
+          <MaterialIcons name="info-outline" size={17} color={palette.primaryDark} />
+          <Text style={{ color: palette.darkMuted, flex: 1, fontSize: 12, lineHeight: 18 }}>
+            API reachability does not confirm Firebase authentication or care data. No sample records or successful actions are shown.
+          </Text>
+        </View>
+      </Card>
+    </CareScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { padding: 22, paddingBottom: 42, paddingTop: 26 },
-  brandRow: { alignItems: "center", flexDirection: "row", gap: 9, marginBottom: 28 },
-  brand: { color: palette.ink, fontFamily: "serif", fontSize: 18, fontWeight: "700" },
-  title: { color: palette.ink, fontFamily: "serif", fontSize: 30, fontWeight: "700", lineHeight: 37, marginTop: 9 },
-  description: { color: palette.inkSoft, fontSize: 14, lineHeight: 21, marginTop: 9 },
-  card: { gap: 12, marginTop: 23 },
-  statusRow: { alignItems: "center", flexDirection: "row", gap: 9 },
-  statusTitle: { color: palette.ink, fontSize: 14, fontWeight: "800" },
-  note: { color: palette.darkMuted, fontSize: 12, lineHeight: 18 },
-  emergency: { borderTopColor: palette.line, borderTopWidth: 1, color: palette.muted, fontSize: 11, lineHeight: 17, marginTop: 25, paddingTop: 14 },
-});

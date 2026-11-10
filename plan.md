@@ -10,7 +10,7 @@ The user's latest request prioritizes correcting frontend behavior now: remove o
 
 The selected repository is `drvermasingod-ux/ElderCare`, branch `main`, initially cloned at `3ff688fdf3c54cec4158983b436f42b1d0906575`. It contains an Expo SDK 57 / React Native 0.86 TypeScript app with Expo Router under `app/`, a root Express/tRPC TypeScript API under `server/`, Drizzle/MySQL user persistence under `drizzle/`, and a standalone static website under `website/`. `render.yaml` defines a Render API service, but this audit has not confirmed a deployed service or live health endpoint. There is no Cloudflare Pages deployment config in the repository.
 
-Current authentication is a Manus OAuth session, not Firebase Authentication. Mobile onboarding, role selection, care data, SOS, bookings, staff visits, vault uploads, and reminders include hard-coded/local demo behavior. The backend exposes general integration adapters but has no Firebase Admin verification, Firestore care-domain routes, relationship/assignment authorization, webhooks, or domain audit model. Admin is a static public HTML shell with an alert. The download CTA is also an alert. Existing ElderCare assets and its warm cream, deep-blue, sage, and terracotta palette should be preserved.
+Current authentication is a Manus OAuth session, not Firebase Authentication. Mobile onboarding, role selection, care data, SOS, bookings, staff visits, vault uploads, and reminders include hard-coded/local demo behavior. The backend exposes general integration adapters but has no Firebase Admin verification, Firestore care-domain routes, relationship/assignment authorization, webhooks, or domain audit model. Admin is a static public HTML shell with an alert. The download CTA is also an alert. Existing ElderCare assets and the hand-heart mark are preserved; mobile colors are being aligned to the user's pale-blue, teal, and deep-navy reference.
 
 ### Target architecture and decisions
 
@@ -28,7 +28,7 @@ Current authentication is a Manus OAuth session, not Firebase Authentication. Mo
 |---|---|---|
 | Application name and public copy | Central public website/mobile config | Brand currently ElderCare Companion; preserve unless changed by owner |
 | Logo, icons and favicon | Existing image assets and Expo/site asset config | Existing ElderCare assets present; retain and document replacement points |
-| Color palette and typography | Shared design tokens/site CSS and mobile theme | Existing calming cream/navy/sage/terracotta direction retained |
+| Color palette and typography | Shared design tokens/site CSS and mobile theme | Mobile palette follows the supplied pale-blue/teal/navy reference; typography remains accessible and system-based |
 | Primary and regional languages | Locale config and translated message resources | English UI is present; regional/voice language list needs owner/provider setup |
 | Parent, child/family and staff role labels/views | Trusted role enum plus configurable copy; never client-assigned authority | Parent/Child/Staff/Admin requirements; existing UI uses `client`/`staff` demo routing |
 | Elder profiles and health summaries | Firestore-owned profile records and typed forms | No live care profiles; collect only consented/necessary data |
@@ -59,18 +59,22 @@ Work incrementally against the repository's existing TypeScript style: establish
 
 ### Design direction
 
-- **Design Movement:** retain the project's existing traditional, calming ElderCare visual language rather than introducing a new aesthetic.
-- **Core Principles:** reassuring but never falsely reassuring; legible and touch-friendly for older adults; dignified family visibility; explicit consent and honest service state.
-- **Color Philosophy:** warm cream surfaces reduce clinical harshness; deep blue anchors clarity and trust; sage signals confirmed/healthy states only; terracotta reserves attention for urgent/confirmable actions.
-- **Layout Paradigm:** editorial, spacious public landing page; mobile role dashboards use a clear vertical daily-care sequence; admin uses restrained operational tables only after secure authorization.
-- **Signature Elements:** the existing ElderCare botanical/hand motif and soft rounded care cards; an unobtrusive status treatment that distinguishes live, unavailable, and pending states.
-- **Interaction Philosophy:** clear confirmations before consequential actions, large accessible targets, plain-language failure recovery, and no silent demo success.
-- **Animation:** subtle short fades/transitions only; respect reduced-motion settings; never animate urgent/safety state in a way that obscures it.
-- **Typography System:** preserve the existing brand typography where legible; prefer a high-x-height sans-serif for functional mobile text and a restrained display face for headings, with dynamic type/large text support.
+- **Design Movement:** apply the supplied reference's calm, modern care dashboard—airy light-blue backgrounds, white rounded cards, teal actions and clear phone-sized steps—while retaining ElderCare's existing hand-heart mark and deep navy.
+- **Core Principles:** older-adult legibility; one-handed portrait use; visible care status; gentle but truthful microcopy; no health, family or emergency data invented for visual completeness.
+- **Color Philosophy:** pale sky `#EAF6FC` softens the screen; white cards separate tasks; deep navy `#17324D` anchors trust; teal `#128F9D` signals primary actions; red is reserved for SOS-related warnings and never indicates a successful dispatch without a real confirmation.
+- **Layout Paradigm:** a narrow, centered phone canvas on web with a vertically scrolling card stack; mobile bottom navigation leads to Home, Meds, SOS and Family, while Visits, Vault and Settings remain reachable as protected secondary screens.
+- **Signature Elements:** the supplied ElderCare hand-heart logo, rounded metric/status cards, and small teal connection pills; show “not connected” or empty states instead of the reference's illustrative sample vitals, names, locations and medication values.
+- **Interaction Philosophy:** large touch targets, clear consent and service-state explanations; login/signup affordances may show why secure sign-in is unavailable but may not create an account or send a pretend OTP; consequential care actions remain disabled until a real authorized API exists.
+- **Animation:** short 150–200 ms fades/press feedback; respect reduced-motion settings; avoid animated pulses that could imply live health monitoring or SOS delivery.
+- **Typography System:** use the existing system sans-serif for readable controls and body text, with navy semibold headings; preserve dynamic type and adequate line height.
 - **Brand Essence:** calm, consent-led coordination for elders, family members and trusted care partners; personality: warm, dependable, respectful.
-- **Brand Voice:** plain, gentle, specific, and candid about limits. Example: “Your family can see the update you chose to share.” “This service is not available yet; no alert has been sent.”
-- **Wordmark & Logo:** keep the existing ElderCare Companion wordmark and supplied mark; do not replace with default text branding.
-- **Signature Brand Color:** preserve the existing deep navy `#17324D` as the brand anchor.
+- **Brand Voice:** plain, gentle, specific, and candid about limits. Example: “Your care circle will appear after secure access is connected.” “No emergency alert has been sent; contact local emergency services if needed.”
+- **Wordmark & Logo:** reuse the existing ElderCare Companion wordmark and supplied hand-heart mark; do not replace it with generated or default text branding.
+- **Signature Brand Color:** teal `#128F9D` for clear primary controls, supported by deep navy `#17324D` and the existing restrained care palette.
+
+### Screenshot-reference behavior boundary
+
+The mobile implementation follows the reference's welcome → secure-access → care overview → medication → health/SOS → family flow. The reference's Admin Portal and APK/store download panels remain on the separate public website rather than being embedded as mobile admin capabilities. The source image's “Demo Mode (Mock Auth)”, example names, fake numbers, sample map/location and active SOS are visual-only content and must not be copied as app data or working actions. Until real auth and APIs are deployed, those areas display explicit unavailable states and disabled actions.
 
 ### Material external dependencies and limitations
 
