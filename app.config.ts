@@ -1,5 +1,7 @@
 // Load environment variables with proper priority (system > .env)
 import "./scripts/load-env.js";
+import { existsSync } from "node:fs";
+import { isAbsolute, resolve } from "node:path";
 import type { ExpoConfig } from "expo/config";
 
 // Bundle ID format: space.manus.<project_name_dots>.<timestamp>
@@ -25,6 +27,22 @@ const bundleId =
 // e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
 const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
 const schemeFromBundleId = `manus${timestamp}`;
+
+function configuredFirebaseFile(envName: string, localPath: string): string | undefined {
+  const configuredPath = process.env[envName]?.trim();
+  const path = configuredPath
+    ? (isAbsolute(configuredPath) ? configuredPath : resolve(process.cwd(), configuredPath))
+    : resolve(process.cwd(), localPath);
+  if (!existsSync(path)) {
+    if (configuredPath) throw new Error(`${envName} points to a file that does not exist.`);
+    return undefined;
+  }
+  return path;
+}
+
+const googleServicesFile = configuredFirebaseFile("GOOGLE_SERVICES_JSON_FILE", "firebase/google-services.json");
+const googleServiceInfoPlistFile = configuredFirebaseFile("GOOGLE_SERVICE_INFO_PLIST_FILE", "firebase/GoogleService-Info.plist");
+const firebaseNativePluginEnabled = Boolean(googleServicesFile || googleServiceInfoPlistFile);
 
 const env = {
   // App branding - update these values directly (do not use env vars)
@@ -58,6 +76,10 @@ const publicRuntime = {
   apiBaseUrl:
     process.env.EXPO_PUBLIC_API_BASE_URL ||
     "https://eldercare-api-vaee.onrender.com",
+  firebaseNativeConfigured: Boolean(googleServicesFile || googleServiceInfoPlistFile),
+  firebaseAndroidConfigured: Boolean(googleServicesFile),
+  firebaseIosConfigured: Boolean(googleServiceInfoPlistFile),
+  ...(process.env.EAS_PROJECT_ID?.trim() ? { eas: { projectId: process.env.EAS_PROJECT_ID.trim() } } : {}),
 };
 
 const config: ExpoConfig = {
@@ -72,11 +94,13 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
+    googleServicesFile: googleServiceInfoPlistFile,
     "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
   },
   android: {
+    googleServicesFile,
     adaptiveIcon: {
       backgroundColor: "#17324D",
       foregroundImage: "./assets/images/android-icon-foreground.png",
@@ -108,6 +132,7 @@ const config: ExpoConfig = {
   plugins: [
     "expo-asset",
     "expo-router",
+    ...(firebaseNativePluginEnabled ? ["@react-native-firebase/app", "@react-native-firebase/auth"] : []),
     "expo-notifications",
     [
       "expo-audio",

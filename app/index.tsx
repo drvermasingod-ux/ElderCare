@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ActionButton, Card, LogoMark, StatusPill } from "@/components/care-ui";
+import { FirebaseAuthPanel } from "@/components/firebase-auth-panel";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { checkApiHealth, type ApiHealth } from "@/lib/api-health";
@@ -10,7 +11,16 @@ import { palette } from "@/lib/eldercare";
 
 export default function EntryScreen() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const {
+    user,
+    loading,
+    error,
+    needsProfile,
+    needsEmailVerification,
+    sessionEmail,
+    refresh,
+    logout,
+  } = useAuth();
   const [apiHealth, setApiHealth] = useState<ApiHealth>("checking");
   const [authPrompt, setAuthPrompt] = useState<"sign-in" | "sign-up" | null>(null);
 
@@ -30,10 +40,13 @@ export default function EntryScreen() {
     }
   }, [loading, router, user?.role]);
 
+  const requiredAuthPrompt = !loading && (needsProfile || needsEmailVerification) ? "sign-in" : null;
+  const activeAuthPrompt = authPrompt ?? requiredAuthPrompt;
+
   const apiLabel = apiHealth === "checking"
     ? "Checking API connection"
     : apiHealth === "available"
-      ? "API reachable · authentication not confirmed"
+      ? "API reachable · Firebase session checked separately"
       : "API is currently unavailable";
 
   return (
@@ -56,10 +69,10 @@ export default function EntryScreen() {
             <Text style={styles.title}>Peace of mind, closer together.</Text>
             <Text style={styles.subtitle}>Thoughtful care coordination for older adults, the people they love, and trusted care partners.</Text>
             <View style={styles.buttonStack}>
-              <ActionButton accessibilityLabel="Log in with verified access" icon="lock-outline" onPress={() => setAuthPrompt("sign-in")}>Log in</ActionButton>
-              <ActionButton accessibilityLabel="Create an account with verified access" icon="person-add-alt-1" onPress={() => setAuthPrompt("sign-up")} variant="secondary">Create account</ActionButton>
+              <ActionButton accessibilityLabel="Log in with Firebase Phone OTP or Email and Password" icon="lock-outline" onPress={() => setAuthPrompt("sign-in")}>Log in</ActionButton>
+              <ActionButton accessibilityLabel="Create a Parent or Child account with Firebase" icon="person-add-alt-1" onPress={() => setAuthPrompt("sign-up")} variant="secondary">Create account</ActionButton>
             </View>
-            <Text style={styles.secureCopy}>Secure access only. We never use a demo account or pretend OTP.</Text>
+            <Text style={styles.secureCopy}>Firebase verifies your sign-in. ElderCare’s server assigns Parent or Child access.</Text>
           </Card>
 
           <Card style={styles.statusCard}>
@@ -70,8 +83,10 @@ export default function EntryScreen() {
               <Text style={styles.statusTitle}>Service status</Text>
             </View>
             <Text accessibilityLiveRegion="polite" style={styles.statusText}>{apiLabel}</Text>
-            <Text style={styles.statusFootnote}>A reachable API does not mean Firebase sign-in or care records are enabled.</Text>
+            <Text style={styles.statusFootnote}>A reachable API does not mean Firebase or care workflows are configured.</Text>
           </Card>
+
+          {error ? <Text accessibilityLiveRegion="polite" style={styles.authError}>{error.message}</Text> : null}
 
           {user ? (
             <Pressable accessibilityRole="button" onPress={() => void logout()} style={styles.signOut}>
@@ -82,7 +97,7 @@ export default function EntryScreen() {
 
           <Text style={styles.emergencyText}>ElderCare Companion is not a replacement for local emergency services.</Text>
           <Pressable accessibilityRole="button" onPress={() => setAuthPrompt("sign-in")} style={styles.learnMore}>
-            <Text style={styles.learnMoreText}>How secure access works</Text>
+            <Text style={styles.learnMoreText}>Secure sign-in options</Text>
             <MaterialIcons name="arrow-forward" size={16} color={palette.primaryDark} />
           </Pressable>
         </View>
@@ -91,17 +106,25 @@ export default function EntryScreen() {
       <Modal
         accessibilityViewIsModal
         animationType="fade"
-        onRequestClose={() => setAuthPrompt(null)}
+        onRequestClose={() => {
+          if (!requiredAuthPrompt) setAuthPrompt(null);
+        }}
         transparent
-        visible={authPrompt !== null}
+        visible={activeAuthPrompt !== null}
       >
         <View style={styles.modalBackdrop}>
-          <Card style={styles.modalCard}>
-            <View style={styles.modalIcon}><MaterialIcons name="verified-user" size={24} color={palette.primaryDark} /></View>
-            <Text style={styles.modalTitle}>{authPrompt === "sign-up" ? "Account creation is not ready yet" : "Secure sign-in is not ready yet"}</Text>
-            <Text style={styles.modalCopy}>Phone OTP and Firebase verification are not connected to this API. No code was sent, no account was created, and no care data was opened.</Text>
-            <ActionButton onPress={() => setAuthPrompt(null)}>Understood</ActionButton>
-          </Card>
+          {activeAuthPrompt ? (
+            <FirebaseAuthPanel
+              initialMode={activeAuthPrompt}
+              needsProfile={needsProfile}
+              needsEmailVerification={needsEmailVerification}
+              sessionEmail={sessionEmail}
+              serverError={error?.message ?? null}
+              onClose={() => setAuthPrompt(null)}
+              onRefresh={refresh}
+              onSignOut={logout}
+            />
+          ) : null}
         </View>
       </Modal>
     </ScreenContainer>
@@ -126,14 +149,11 @@ const styles = StyleSheet.create({
   statusTitle: { color: palette.ink, fontSize: 14, fontWeight: "800" },
   statusText: { color: palette.darkMuted, fontSize: 12, fontWeight: "700", lineHeight: 18 },
   statusFootnote: { color: palette.muted, fontSize: 11, lineHeight: 16 },
+  authError: { color: palette.terracotta, fontSize: 12, lineHeight: 18, textAlign: "center" },
   signOut: { alignItems: "center", alignSelf: "center", flexDirection: "row", gap: 7, minHeight: 44, paddingHorizontal: 10 },
   signOutText: { color: palette.primaryDark, fontSize: 13, fontWeight: "800" },
   emergencyText: { color: palette.muted, fontSize: 11, lineHeight: 16, textAlign: "center" },
   learnMore: { alignItems: "center", alignSelf: "center", flexDirection: "row", gap: 5, minHeight: 44, paddingHorizontal: 10 },
   learnMoreText: { color: palette.primaryDark, fontSize: 12, fontWeight: "800" },
-  modalBackdrop: { alignItems: "center", backgroundColor: "rgba(15, 39, 54, 0.44)", flex: 1, justifyContent: "center", padding: 22 },
-  modalCard: { alignItems: "center", gap: 12, maxWidth: 420, padding: 22, width: "100%" },
-  modalIcon: { alignItems: "center", backgroundColor: palette.primaryWash, borderRadius: 25, height: 50, justifyContent: "center", width: 50 },
-  modalTitle: { color: palette.ink, fontSize: 19, fontWeight: "900", lineHeight: 25, textAlign: "center" },
-  modalCopy: { color: palette.darkMuted, fontSize: 13, lineHeight: 20, textAlign: "center" },
+  modalBackdrop: { backgroundColor: "rgba(15, 39, 54, 0.55)", flex: 1, justifyContent: "center", padding: 14 },
 });

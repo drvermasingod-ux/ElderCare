@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe("integration readiness honesty", () => {
-  it("reports Firebase as not implemented even when all Admin env fields exist", () => {
+  it("reports Firebase Auth/profile bootstrap as adapter-only even when Admin env fields exist", () => {
     ENV.firebaseProjectId = "test-project";
     ENV.firebaseClientEmail = "service@example.invalid";
     ENV.firebasePrivateKey = "test-private-key";
@@ -25,10 +25,20 @@ describe("integration readiness honesty", () => {
     const firebase = getIntegrationStatus().find((item) => item.provider === "Firebase Auth / Firestore / FCM");
     expect(firebase).toMatchObject({
       configured: true,
-      implementation: "not-implemented",
+      implementation: "adapter-only",
       productionReady: false,
     });
-    expect(firebase?.notes).toContain("does not enable Firebase Auth token verification");
+    expect(firebase?.notes).toContain("Firebase ID-token verification and Parent/Child profile bootstrap are implemented");
+    expect(firebase?.notes).toContain("care records");
+  });
+
+  it("does not report Firebase configured when a server credential is missing", () => {
+    ENV.firebaseProjectId = "test-project";
+    ENV.firebaseClientEmail = "service@example.invalid";
+    ENV.firebasePrivateKey = "";
+
+    const firebase = getIntegrationStatus().find((item) => item.provider === "Firebase Auth / Firestore / FCM");
+    expect(firebase).toMatchObject({ configured: false, implementation: "adapter-only", productionReady: false });
   });
 
   it("returns no fabricated reminder when the Gemini provider is absent", async () => {

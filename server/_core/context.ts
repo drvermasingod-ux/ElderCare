@@ -1,26 +1,26 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
+import { authenticateFirebaseBearer, type FirebaseAppUser } from "./firebase";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
-  user: User | null;
+  user: FirebaseAppUser | null;
 };
 
 export async function createContext(opts: CreateExpressContextOptions): Promise<TrpcContext> {
-  let user: User | null = null;
+  const authorization = opts.req.header("authorization") ?? "";
+  const bearerMatch = /^Bearer\s+([A-Za-z0-9._~-]+)$/i.exec(authorization.trim());
+  let user: FirebaseAppUser | null = null;
 
-  try {
-    user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
-    user = null;
+  if (bearerMatch) {
+    // A supplied bearer is always a Firebase ID token. Failure is final: no legacy
+    // Manus cookie/token is consulted as a fallback.
+    try {
+      user = await authenticateFirebaseBearer(bearerMatch[1]);
+    } catch {
+      user = null;
+    }
   }
 
-  return {
-    req: opts.req,
-    res: opts.res,
-    user,
-  };
+  return { req: opts.req, res: opts.res, user };
 }

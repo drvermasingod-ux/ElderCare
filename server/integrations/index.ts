@@ -1,6 +1,7 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ENV } from "../_core/env";
+import { isFirebaseAdminConfigured } from "../_core/firebase";
 
 export type IntegrationStatus = {
   provider: string;
@@ -18,7 +19,7 @@ function configured(...values: string[]) {
 export function getIntegrationStatus(): IntegrationStatus[] {
   return [
     { provider: "Cloudflare R2", configured: configured(ENV.r2AccountId, ENV.r2AccessKeyId, ENV.r2SecretAccessKey, ENV.r2Bucket), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Signed URL adapter only; file metadata, consent, relationship access, and retention workflows are not implemented." },
-    { provider: "Firebase Auth / Firestore / FCM", configured: configured(ENV.firebaseProjectId, ENV.firebaseClientEmail, ENV.firebasePrivateKey), implementation: "not-implemented", productionReady: false, mode: "server-only", notes: "Environment-variable presence does not enable Firebase Auth token verification, Firestore, or FCM; those server workflows are not implemented." },
+    { provider: "Firebase Auth / Firestore / FCM", configured: isFirebaseAdminConfigured(), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Firebase ID-token verification and Parent/Child profile bootstrap are implemented. Native Firebase app setup must be completed; care records, consented family linking, FCM, and end-to-end provider verification remain incomplete." },
     { provider: "Google Gemini", configured: Boolean(ENV.geminiApiKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Text-generation adapter only; care check-in and reminder delivery workflows are not implemented." },
     { provider: "Google Cloud TTS / STT", configured: configured(ENV.googleCloudProjectId, ENV.googleCloudAccessToken), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Speech API adapters only; consented care workflows are not implemented." },
     { provider: "Twilio Voice / Exotel", configured: configured(ENV.twilioAccountSid, ENV.twilioAuthToken, ENV.twilioVoiceFrom) || Boolean(ENV.exotelApiKey), implementation: "adapter-only", productionReady: false, mode: "server-only", notes: "Provider-call adapter only; no persisted schedule, consent, retry, or escalation workflow." },
