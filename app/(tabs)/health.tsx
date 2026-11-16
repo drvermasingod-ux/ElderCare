@@ -1,9 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton, Card, IconBadge, StatusPill } from "@/components/care-ui";
 import { CareScreen, NoticeCard } from "@/components/care-screen";
+import { LiveLocationSharing } from "@/components/live-location-sharing";
 import { palette } from "@/lib/eldercare";
 
-type MetricIcon = "favorite-border" | "directions-walk" | "location-on";
+type MetricIcon = "favorite-border" | "directions-walk";
 
 export default function HealthScreen() {
   return (
@@ -11,8 +12,9 @@ export default function HealthScreen() {
       <View style={styles.metricStack}>
         <MetricStatus icon="favorite-border" title="Heart rate" detail="No health reading connected" />
         <MetricStatus icon="directions-walk" title="Steps" detail="No activity data connected" />
-        <MetricStatus icon="location-on" title="Location" detail="Location sharing is not connected" />
       </View>
+
+      <LiveLocationSharing />
 
       <Card style={styles.sosCard}>
         <View style={styles.sosHeader}>

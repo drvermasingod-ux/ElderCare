@@ -2,6 +2,8 @@ import { getApiBaseUrl } from "@/constants/oauth";
 import * as Auth from "./auth";
 import * as FirebaseAuth from "@/lib/firebase-auth";
 import { isFirebaseAuthBackendReady, type FirebaseIntegrationStatus, type SignupRole } from "@/shared/firebase-auth";
+import type { FamilyLinkRecord } from "@/shared/firebase-family";
+import type { LocationPointInput, SharedFamilyLocation } from "@/shared/location";
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number, public readonly code?: string) {
@@ -123,4 +125,60 @@ export async function bootstrapFirebaseProfile(input: {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export async function getFamilyLinks(): Promise<FamilyLinkRecord[]> {
+  const result = await apiCall<{ links: FamilyLinkRecord[] }>("/api/family/links");
+  return result.links;
+}
+
+export async function createFamilyInvite(input: {
+  recipientPhone: string;
+  permissionConsent: true;
+  relationshipConsent: true;
+  consentVersion: string;
+}): Promise<{ code: string; expiresAt: string; recipientRole: SignupRole }> {
+  const result = await apiCall<{ invite: { code: string; expiresAt: string; recipientRole: SignupRole } }>("/api/family/invites", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  return result.invite;
+}
+
+export async function acceptFamilyInvite(input: {
+  code: string;
+  consent: true;
+  consentVersion: string;
+}): Promise<{ relationship: FamilyLinkRecord; alreadyLinked: boolean }> {
+  return apiCall("/api/family/invites/accept", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getLocationSharingState(): Promise<{ enabled: boolean; generation: number | null; linkedFamilyCount: number }> {
+  return apiCall("/api/location/sharing");
+}
+
+export async function setLocationSharing(input: {
+  enabled: boolean;
+  consent?: true;
+  consentVersion?: string;
+}): Promise<{ enabled: boolean; generation: number | null; linkedFamilyCount: number }> {
+  return apiCall("/api/location/sharing", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function uploadCurrentLocation(point: LocationPointInput, generation: number): Promise<{ accepted: true; receivedAt: string }> {
+  return apiCall("/api/location/current", {
+    method: "POST",
+    body: JSON.stringify({ ...point, generation }),
+  });
+}
+
+export async function getSharedFamilyLocations(): Promise<SharedFamilyLocation[]> {
+  const result = await apiCall<{ locations: SharedFamilyLocation[] }>("/api/location/family");
+  return result.locations;
 }

@@ -28,8 +28,11 @@ describe("integration readiness honesty", () => {
       implementation: "adapter-only",
       productionReady: false,
     });
-    expect(firebase?.notes).toContain("Firebase ID-token verification and Parent/Child profile bootstrap are implemented");
+    expect(firebase?.notes).toContain("Firebase ID-token verification, Parent/Child profile bootstrap");
     expect(firebase?.notes).toContain("care records");
+    expect(firebase?.notes).toContain("verified-phone single-use family invite/link endpoints");
+    expect(firebase?.notes).toContain("foreground-only latest-location sharing endpoints");
+    expect(firebase?.notes).toContain("unlink/revocation");
   });
 
   it("does not report Firebase configured when a server credential is missing", () => {

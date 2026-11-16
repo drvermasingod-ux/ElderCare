@@ -133,6 +133,17 @@ const config: ExpoConfig = {
     "expo-asset",
     "expo-router",
     ...(firebaseNativePluginEnabled ? ["@react-native-firebase/app", "@react-native-firebase/auth"] : []),
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission: "Share your live location with your linked family only while ElderCare is open. This is optional and can be stopped at any time.",
+        locationAlwaysAndWhenInUsePermission: false,
+        locationAlwaysPermission: false,
+        isIosBackgroundLocationEnabled: false,
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
     "expo-notifications",
     [
       "expo-audio",

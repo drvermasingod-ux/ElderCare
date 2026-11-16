@@ -132,6 +132,10 @@ export async function getFirebaseProfile(uid: string): Promise<FirebaseProfile |
   return profileFromData(uid, snapshot.data());
 }
 
+export function getFirebaseAdminFirestore() {
+  return getFirestore(getAdminApp());
+}
+
 export async function createOrGetFirebaseProfile(input: {
   claims: DecodedIdToken;
   role: FirebaseRole;

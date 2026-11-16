@@ -1,6 +1,6 @@
 # ElderCare Firebase Auth setup and owner handoff
 
-**Source status (11 Nov 2026):** Native client Phone OTP and Email/Password flows, Firebase Admin ID-token verification, server-side Parent/Child profile bootstrap, and deny-by-default Firestore client rules are implemented in the working copy. TypeScript, lint, 67 automated tests, API/Expo/website builds and Expo dependency checks passed. This is not live-auth proof: the changes are uncommitted, native Firebase app files/EAS link are absent, Render currently times out from this environment, and no physical-device or real-provider test has been completed.
+**Source status (16 Nov 2026):** Native client Phone OTP and Email/Password flows, Firebase Admin ID-token verification, server-side Parent/Child profile bootstrap, deny-by-default Firestore client rules, secure family-link endpoints/UI, and separately consented foreground-only location sharing are implemented in the working copy. Current checks: TypeScript, lint, production server build, Expo web export, and all 90 automated tests pass. These tests cover route input and pure location policy, not a live Firestore project. The source changes are local and uncommitted; Firebase native app files/EAS link are absent, Firebase Emulator is not configured here, and no physical-device, isolated family-link, or live location test has been completed.
 
 ## Confirmed sign-in behavior
 
@@ -8,7 +8,18 @@
 - Open signup offers only `parent` or `child` roles. Admin/Staff cannot self-register. The API verifies Firebase ID tokens with Firebase Admin and resolves roles from server-owned Firestore profiles; a client role choice never grants access to another person's data.
 - Phone auth requires SMS consent in the app. Firebase Phone OTP needs a custom native build; Expo Go and the Expo web preview are not supported auth test environments.
 - Firebase app/config not present, server credentials not ready, rejected token, or unavailable API all keep secure access blocked. Do not use Manus OAuth as a Firebase fallback.
-- Firestore client rules deny reads and writes. Only initial user profiles are implemented; family linking, care records, SOS, reminders, private vault, staff/admin operations and audit workflows are not yet available.
+- Firestore client rules deny reads and writes. Family linking stores only a Parent/Child relationship: no medical, medication, location, SOS or other care-record access is granted. Care-record workflows, unlink/revocation, SOS, reminders, private vault, staff/admin operations, FCM and production audit operations remain unavailable.
+
+## Secure family linking — source implemented, not launch-validated
+
+- A signed-in active Parent or Child can invite only the opposite role. The inviter must have a Firebase-verified phone claim and separately confirm (1) permission to use the recipient's phone number for this invitation and (2) agreement to create the family relationship if accepted. The recipient must sign in to an active account with the matching verified phone number and provide a separate acceptance consent.
+- The server creates a cryptographically random one-time code, stores its SHA-256 hash and a second code-bound SHA-256 digest for the invited phone/role (not the phone number itself), enforces a 24-hour expiry and per-user rate limits, and performs acceptance plus relationship creation in a Firestore transaction. Replays, expired codes, wrong phone numbers and wrong roles receive a generic invalid-invitation response. Creation/acceptance actions are written to `familyAuditEvents`; clients cannot read or modify these collections.
+- The mobile UI displays a code once and uses the OS share sheet only after user action. Do not send codes automatically. The code should only be shared with the intended recipient.
+- Before launch, test expiration, replay, wrong-phone and wrong-role rejection, concurrent acceptance, rate limiting, relationship ownership and audit entries in a Firebase Emulator or isolated non-production project. Configure cleanup/TTL for expired invitation/rate-limit records and define unlink/revocation before exposing care data. A family relationship is not a care-data permission.
+
+## Foreground location sharing
+
+The location feature has a separate in-app consent checkbox, requests only OS foreground location permission, and shares a latest point only with current active family links captured when consent is enabled. A viewer does not have to enable their own location to view a consenting linked member's point; future links are not included automatically. App-background updates, geofencing, history, maps, alerts, and SOS are not implemented. Points older than five minutes are hidden by the API; the `latestLocations.expiresAt` TTL field still requires project-owner activation. See [LOCATION-SHARING.md](./LOCATION-SHARING.md) for API behavior, retention, native build steps, and emulator/device test requirements.
 
 ## Firebase Console actions
 
@@ -22,7 +33,7 @@
 
 In Render Dashboard → **eldercare-api → Environment**, set `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` from the Firebase service account, plus `PUBLIC_APP_URLS=https://eldercare.pages.dev` (add any approved website origins as exact HTTPS origins). Do not share the private key in chat, Cloudflare Pages, Expo public variables, or GitHub. A populated secret only satisfies a configuration gate; it does not prove Firestore access, provider health, or working sign-in.
 
-The latest bounded live check from this session timed out on both `/api/health` and `/api/integrations/status`. Review Render service events/logs and restore a working endpoint before treating the public API as ready.
+In a bounded check on 11 Nov 2026, both `/api/health` and `/api/integrations/status` timed out; recheck current Render health and integrations status before treating the public API as ready.
 
 ## Expo/EAS — native configuration and APK
 
